@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgb(190, 10, 79);
+        }
+        
+        canvas {
+            background-color: rgb(109, 199, 207);
+            border-radius: 10px;
+        }
+        
+        .score {
+            position: absolute;
+            top: 140px;
+            left: 1120px;
+        }
+        
+        .gameover {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 100px;
+            color: chartreuse;
+            background-color: rgb(0, 17, 255);
+        }
+        
+        audio {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <audio src="dd.mp3" loop='loop' preload='preload' autoplay="autoplay" controls="controls"></audio>
+    <canvas width="800px" height="400px">
+
+    </canvas>
+    <div class="score">得分：</div>
+    <div class="gameover">游戏失败！
+    </div>
+    <script>
+        var canvas = document.querySelector('canvas');
+        var context = canvas.getContext('2d');
+        var youscore = document.querySelector('.score');
+        var gameover = document.querySelector('.gameover');
+        var X = 200;
+        var Y = 100;
+        var img = new Image();
+        img.src = 'xiaoniao.png';
+        var xiaoniaotimer = null
+        img.onload = function() {
+            if (xiaoniaotimer == null) {
+                xiaoniaotimer = setInterval(function() {
+                    if (Y <= 367) {
+                        Y++;
+                        context.clearRect(0, 0, 800, 500);
+                        drawzhuzi()
+                        context.drawImage(img, X, Y);
+
+                    } else {
+                        gameover.style.display = 'block';
+                        setInterval(function() {
+                            gameover.innerHTML = '三秒后重新开始';
+                            setInterval(function() {
+                                location.reload();
+                            }, 2000)
+                        }, 1000)
+                    }
+                }, 10)
+            }
+        }
+        document.addEventListener('click', function() {
+            Y = Y - 20;
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode == 38) {
+                Y = Y - 20;
+            }
+        });
+
+        //   声明一个数组，用于批量生产柱子
+        var arr = [];
+        var creatzhuzitimer = null
+
+        function creatzhuzi() {
+            creatzhuzitimer = setInterval(function() {
+                // 创建一个柱子对象
+                var zhuzi = {};
+                // 为柱子设置属性
+                zhuzi.id = new Date().getTime();
+                zhuzi.positionX = 800;
+                zhuzi.positionY = -Math.round(Math.random() * 100 + 100)
+                zhuzi.imga = new Image();
+                zhuzi.imgb = new Image();
+                zhuzi.imga.src = 'zhuzishang.png';
+                zhuzi.imgb.src = 'zhuzixia.png';
+                arr.push(zhuzi);
+            }, 2000)
+
+        }
+        creatzhuzi();
+        var same = null;
+        var score = 0;
+
+        function drawzhuzi() {
+            for (var i = 0; i < arr.length; i++) {
+                arr[i].positionX--;
+                context.drawImage(arr[i].imga, arr[i].positionX, arr[i].positionY);
+                context.drawImage(arr[i].imgb, arr[i].positionX, arr[i].positionY + 350);
+                if (X + 45 >= arr[i].positionX && X - 50 <= arr[i].positionX) {
+                    if (arr[i].id != same) {
+                        score++;
+                        same = arr[i].id;
+                        youscore.innerHTML = "得分：" + score + "";
+                    }
+                    if (Y <= arr[i].positionY + 250 || Y + 33 > arr[i].positionY + 250 + 100) {
+                        clearInterval(xiaoniaotimer);
+                        clearInterval(creatzhuzitimer);
+                        gameover.style.display = 'block';
+
+                        setInterval(function() {
+                            gameover.innerHTML = '三秒后重新开始';
+                            setInterval(function() {
+                                location.reload();
+                            }, 2000)
+                        }, 1000)
+                    }
+
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
